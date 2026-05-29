@@ -13,7 +13,7 @@ cd mockups
 docker compose up -d --build
 ```
 
-Accede en `http://tu-servidor:8080`
+Accede en `http://tu-servidor:9005`
 
 **Actualizar a nueva versión:**
 ```bash
