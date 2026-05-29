@@ -1899,8 +1899,9 @@ async function exportPNG() {
       logging: false,
     });
 
-    // add watermark — canvas is scale:2 so all coords/sizes × 2
+    // add watermark — reset transform left by html2canvas before drawing
     const ctx = canvas.getContext('2d');
+    ctx.setTransform(1, 0, 0, 1, 0, 0);
     const wm = 'mockups by andyjara.dev';
     const sc = canvas.width / mockup.canvasWidth; // typically 2
     const fontSize = Math.round(13 * sc);
