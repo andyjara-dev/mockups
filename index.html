@@ -1899,15 +1899,37 @@ async function exportPNG() {
       logging: false,
     });
 
-    // add watermark
+    // add watermark with background pill
     const ctx = canvas.getContext('2d');
     const wm = 'mockups by andyjara.dev';
+    const fontSize = 22;
     ctx.save();
-    ctx.font = `${14 * 2}px -apple-system, sans-serif`;
-    ctx.fillStyle = 'rgba(100,116,139,0.55)';
+    ctx.font = `600 ${fontSize}px -apple-system, BlinkMacSystemFont, sans-serif`;
     ctx.textAlign = 'right';
     ctx.textBaseline = 'bottom';
-    ctx.fillText(wm, canvas.width - 16, canvas.height - 12);
+    const textW = ctx.measureText(wm).width;
+    const padX = 14, padY = 8, radius = 8;
+    const bx = canvas.width - textW - padX * 2 - 16;
+    const by = canvas.height - fontSize - padY * 2 - 16;
+    const bw = textW + padX * 2;
+    const bh = fontSize + padY * 2;
+    // draw rounded rect background
+    ctx.beginPath();
+    ctx.moveTo(bx + radius, by);
+    ctx.lineTo(bx + bw - radius, by);
+    ctx.quadraticCurveTo(bx + bw, by, bx + bw, by + radius);
+    ctx.lineTo(bx + bw, by + bh - radius);
+    ctx.quadraticCurveTo(bx + bw, by + bh, bx + bw - radius, by + bh);
+    ctx.lineTo(bx + radius, by + bh);
+    ctx.quadraticCurveTo(bx, by + bh, bx, by + bh - radius);
+    ctx.lineTo(bx, by + radius);
+    ctx.quadraticCurveTo(bx, by, bx + radius, by);
+    ctx.closePath();
+    ctx.fillStyle = 'rgba(13,17,23,0.65)';
+    ctx.fill();
+    // draw text
+    ctx.fillStyle = 'rgba(255,255,255,0.90)';
+    ctx.fillText(wm, canvas.width - 16 - padX, canvas.height - 16 - padY);
     ctx.restore();
 
     const url = canvas.toDataURL('image/png');
