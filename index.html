@@ -1,0 +1,1936 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Mockups Builder — by andyjara.dev</title>
+<script src="https://html2canvas.hertzen.com/dist/html2canvas.min.js"></script>
+<style>
+:root {
+  --bg-main:        #0d1117;
+  --bg-sidebar:     #131a2e;
+  --bg-header:      #0d1117;
+  --bg-card:        #1a2540;
+  --bg-hover:       #1e3347;
+  --accent:         #29b6d8;
+  --accent-hover:   #1e9ab8;
+  --canvas-bg:      #f1f5f9;
+  --text-primary:   #e2e8f0;
+  --text-muted:     #8b9ab0;
+  --border:         #1e2d45;
+  --active-bg:      #1e3347;
+  --active-border:  #29b6d8;
+  --danger:         #e05252;
+  --success:        #34d399;
+  --sidebar-w:      220px;
+  --props-w:        240px;
+  --header-h:       48px;
+  --footer-h:       28px;
+  --toolbar-h:      52px;
+}
+
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+body {
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  background: var(--bg-main);
+  color: var(--text-primary);
+  height: 100vh;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  font-size: 13px;
+}
+
+/* ── HEADER ── */
+#header {
+  height: var(--header-h);
+  background: var(--bg-header);
+  border-bottom: 1px solid var(--border);
+  display: flex;
+  align-items: center;
+  padding: 0 12px;
+  gap: 12px;
+  flex-shrink: 0;
+  z-index: 100;
+}
+
+.logo {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-weight: 700;
+  font-size: 15px;
+  color: var(--accent);
+  white-space: nowrap;
+}
+
+.logo svg { width: 24px; height: 24px; }
+
+#project-selector {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  color: var(--text-primary);
+  padding: 4px 8px;
+  border-radius: 6px;
+  font-size: 13px;
+  cursor: pointer;
+  min-width: 160px;
+}
+
+#project-selector:focus { outline: 1px solid var(--accent); }
+
+.header-spacer { flex: 1; }
+
+.btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 5px 10px;
+  border-radius: 6px;
+  border: none;
+  cursor: pointer;
+  font-size: 12px;
+  font-weight: 500;
+  transition: background .15s;
+  white-space: nowrap;
+}
+
+.btn-primary { background: var(--accent); color: #000; }
+.btn-primary:hover { background: var(--accent-hover); }
+.btn-ghost { background: transparent; color: var(--text-muted); border: 1px solid var(--border); }
+.btn-ghost:hover { background: var(--bg-hover); color: var(--text-primary); }
+.btn-danger { background: transparent; color: var(--danger); border: 1px solid var(--danger); }
+.btn-danger:hover { background: var(--danger); color: #fff; }
+.btn-sm { padding: 3px 7px; font-size: 11px; }
+
+/* ── BODY LAYOUT ── */
+#body {
+  display: flex;
+  flex: 1;
+  overflow: hidden;
+}
+
+/* ── SIDEBAR ── */
+#sidebar {
+  width: var(--sidebar-w);
+  background: var(--bg-sidebar);
+  border-right: 1px solid var(--border);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  flex-shrink: 0;
+}
+
+.sidebar-section { border-bottom: 1px solid var(--border); }
+
+.sidebar-section-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 8px 10px;
+  font-size: 11px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: .05em;
+  color: var(--text-muted);
+}
+
+.sidebar-section-header button {
+  background: none;
+  border: none;
+  color: var(--accent);
+  cursor: pointer;
+  font-size: 16px;
+  line-height: 1;
+  padding: 0 2px;
+}
+
+.sidebar-section-header button:hover { color: var(--accent-hover); }
+
+.sidebar-list { overflow-y: auto; max-height: 200px; }
+
+.sidebar-item {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 10px;
+  cursor: pointer;
+  border-left: 3px solid transparent;
+  transition: background .1s;
+}
+
+.sidebar-item:hover { background: var(--bg-hover); }
+.sidebar-item.active {
+  background: var(--active-bg);
+  border-left-color: var(--active-border);
+  color: var(--accent);
+}
+
+.sidebar-item .item-name {
+  flex: 1;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.sidebar-item .item-actions {
+  display: none;
+  gap: 3px;
+}
+
+.sidebar-item:hover .item-actions { display: flex; }
+
+.sidebar-item .item-actions button {
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-size: 11px;
+  color: var(--text-muted);
+  padding: 1px 3px;
+  border-radius: 3px;
+}
+
+.sidebar-item .item-actions button:hover { color: var(--danger); background: rgba(224,82,82,.15); }
+
+.mockup-thumb {
+  width: 32px;
+  height: 22px;
+  background: var(--canvas-bg);
+  border: 1px solid var(--border);
+  border-radius: 3px;
+  overflow: hidden;
+  flex-shrink: 0;
+}
+
+.device-icon { font-size: 11px; }
+
+/* ── CANVAS AREA ── */
+#canvas-area {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  background: #0a0e1a;
+}
+
+#canvas-toolbar {
+  height: var(--toolbar-h);
+  background: var(--bg-header);
+  border-bottom: 1px solid var(--border);
+  display: flex;
+  align-items: center;
+  padding: 0 10px;
+  gap: 6px;
+  flex-shrink: 0;
+  overflow-x: auto;
+}
+
+.widget-btn {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+  padding: 4px 8px;
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  cursor: pointer;
+  color: var(--text-muted);
+  font-size: 10px;
+  white-space: nowrap;
+  transition: all .15s;
+  min-width: 44px;
+}
+
+.widget-btn:hover { background: var(--bg-hover); color: var(--accent); border-color: var(--accent); }
+.widget-btn .wicon { font-size: 16px; }
+
+#canvas-wrapper {
+  flex: 1;
+  overflow: auto;
+  display: flex;
+  align-items: flex-start;
+  justify-content: flex-start;
+  padding: 20px;
+  position: relative;
+}
+
+#canvas-wrapper::-webkit-scrollbar { width: 6px; height: 6px; }
+#canvas-wrapper::-webkit-scrollbar-track { background: #0a0e1a; }
+#canvas-wrapper::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
+
+#canvas-frame {
+  position: relative;
+  background: var(--canvas-bg);
+  box-shadow: 0 0 0 1px var(--border), 0 8px 40px rgba(0,0,0,.6);
+  flex-shrink: 0;
+  user-select: none;
+  overflow: hidden;
+}
+
+#canvas-frame.mobile-frame {
+  border-radius: 24px;
+  box-shadow: 0 0 0 8px #1a2540, 0 0 0 9px #29b6d830, 0 16px 60px rgba(0,0,0,.8);
+}
+
+/* dot grid */
+#canvas-frame::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background-image: radial-gradient(circle, #c8d5e8 1px, transparent 1px);
+  background-size: 20px 20px;
+  pointer-events: none;
+  opacity: .4;
+}
+
+/* ── ELEMENTS ON CANVAS ── */
+.canvas-el {
+  position: absolute;
+  cursor: move;
+  box-sizing: border-box;
+}
+
+.canvas-el.selected {
+  outline: 2px solid var(--accent);
+  outline-offset: 1px;
+}
+
+.canvas-el .resize-handle {
+  display: none;
+  position: absolute;
+  width: 8px;
+  height: 8px;
+  background: var(--accent);
+  border: 1px solid #fff;
+  border-radius: 2px;
+  z-index: 10;
+}
+
+.canvas-el.selected .resize-handle { display: block; }
+
+.rh-nw { top:-4px; left:-4px; cursor:nw-resize; }
+.rh-n  { top:-4px; left:50%; transform:translateX(-50%); cursor:n-resize; }
+.rh-ne { top:-4px; right:-4px; cursor:ne-resize; }
+.rh-e  { top:50%; right:-4px; transform:translateY(-50%); cursor:e-resize; }
+.rh-se { bottom:-4px; right:-4px; cursor:se-resize; }
+.rh-s  { bottom:-4px; left:50%; transform:translateX(-50%); cursor:s-resize; }
+.rh-sw { bottom:-4px; left:-4px; cursor:sw-resize; }
+.rh-w  { top:50%; left:-4px; transform:translateY(-50%); cursor:w-resize; }
+
+/* ── WIDGET RENDERS ── */
+.w-text { font-size: 14px; color: #1e293b; overflow: hidden; }
+.w-label { font-size: 12px; font-weight: 600; color: #475569; overflow: hidden; }
+.w-input {
+  width: 100%; height: 100%;
+  background: #fff;
+  border: 1px solid #cbd5e1;
+  border-radius: 5px;
+  padding: 0 8px;
+  font-size: 13px;
+  color: #64748b;
+  display: flex; align-items: center;
+  overflow: hidden;
+}
+
+.w-textarea {
+  width: 100%; height: 100%;
+  background: #fff;
+  border: 1px solid #cbd5e1;
+  border-radius: 5px;
+  padding: 6px 8px;
+  font-size: 13px;
+  color: #64748b;
+  overflow: hidden;
+  display: flex;
+  align-items: flex-start;
+}
+
+.w-btn {
+  width: 100%; height: 100%;
+  border: none;
+  border-radius: 6px;
+  font-size: 13px;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  pointer-events: none;
+}
+
+.w-btn.primary { background: #3b82f6; color: #fff; }
+.w-btn.secondary { background: #e2e8f0; color: #334155; }
+.w-btn.danger { background: #ef4444; color: #fff; }
+.w-btn.outline { background: transparent; border: 2px solid #3b82f6; color: #3b82f6; }
+
+.w-select {
+  width: 100%; height: 100%;
+  background: #fff;
+  border: 1px solid #cbd5e1;
+  border-radius: 5px;
+  padding: 0 8px;
+  font-size: 13px;
+  color: #64748b;
+  display: flex; align-items: center;
+  justify-content: space-between;
+  overflow: hidden;
+}
+
+.w-checkbox, .w-radio {
+  display: flex; align-items: center; gap: 6px;
+  font-size: 13px; color: #334155;
+  height: 100%;
+}
+
+.w-checkbox-box {
+  width: 16px; height: 16px; min-width: 16px;
+  border: 2px solid #94a3b8;
+  border-radius: 3px;
+  background: #fff;
+  display: flex; align-items: center; justify-content: center;
+}
+
+.w-checkbox-box.checked { background: #3b82f6; border-color: #3b82f6; color: #fff; font-size: 11px; }
+
+.w-radio-circle {
+  width: 16px; height: 16px; min-width: 16px;
+  border: 2px solid #94a3b8;
+  border-radius: 50%;
+  background: #fff;
+  display: flex; align-items: center; justify-content: center;
+}
+
+.w-radio-circle.checked::after {
+  content: '';
+  width: 8px; height: 8px;
+  border-radius: 50%;
+  background: #3b82f6;
+}
+
+.w-image {
+  width: 100%; height: 100%;
+  background: #e2e8f0;
+  border: 2px dashed #94a3b8;
+  border-radius: 6px;
+  display: flex; flex-direction: column;
+  align-items: center; justify-content: center;
+  color: #94a3b8; font-size: 11px; gap: 4px;
+}
+
+.w-image .img-icon { font-size: 28px; }
+
+.w-rect {
+  width: 100%; height: 100%;
+  border-radius: 6px;
+}
+
+.w-separator {
+  width: 100%; height: 100%;
+  display: flex; align-items: center;
+}
+
+.w-separator hr { width: 100%; border: none; border-top: 2px solid #e2e8f0; }
+
+.w-navbar {
+  width: 100%; height: 100%;
+  background: #1e293b;
+  display: flex; align-items: center;
+  padding: 0 16px; gap: 20px;
+  color: #e2e8f0; font-size: 13px;
+}
+
+.w-navbar .nav-brand { font-weight: 700; color: #38bdf8; }
+.w-navbar .nav-links { display: flex; gap: 16px; }
+.w-navbar .nav-link { color: #94a3b8; font-size: 12px; }
+.w-navbar .nav-link.active { color: #e2e8f0; }
+
+.w-card {
+  width: 100%; height: 100%;
+  background: #fff;
+  border-radius: 10px;
+  box-shadow: 0 1px 3px rgba(0,0,0,.12), 0 4px 16px rgba(0,0,0,.08);
+  padding: 16px;
+  overflow: hidden;
+}
+
+.w-card .card-title { font-weight: 600; color: #1e293b; font-size: 14px; }
+.w-card .card-body { color: #64748b; font-size: 12px; margin-top: 6px; }
+
+/* ── PROPS PANEL ── */
+#props-panel {
+  width: var(--props-w);
+  background: var(--bg-sidebar);
+  border-left: 1px solid var(--border);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  flex-shrink: 0;
+}
+
+#props-panel h3 {
+  padding: 10px 12px;
+  font-size: 11px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: .05em;
+  color: var(--text-muted);
+  border-bottom: 1px solid var(--border);
+}
+
+#props-content {
+  flex: 1;
+  overflow-y: auto;
+  padding: 10px 12px;
+}
+
+.prop-group { margin-bottom: 12px; }
+
+.prop-label {
+  font-size: 11px;
+  color: var(--text-muted);
+  margin-bottom: 4px;
+  font-weight: 500;
+}
+
+.prop-input {
+  width: 100%;
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  color: var(--text-primary);
+  padding: 5px 8px;
+  border-radius: 5px;
+  font-size: 12px;
+}
+
+.prop-input:focus { outline: 1px solid var(--accent); }
+
+.prop-row { display: flex; gap: 6px; }
+.prop-row .prop-group { flex: 1; }
+
+.prop-select {
+  width: 100%;
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  color: var(--text-primary);
+  padding: 5px 6px;
+  border-radius: 5px;
+  font-size: 12px;
+}
+
+.prop-select:focus { outline: 1px solid var(--accent); }
+
+.no-selection {
+  color: var(--text-muted);
+  font-size: 12px;
+  text-align: center;
+  margin-top: 30px;
+  line-height: 1.6;
+}
+
+.prop-color {
+  display: flex; gap: 6px; align-items: center;
+}
+
+.prop-color input[type=color] {
+  width: 32px; height: 28px;
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  background: none;
+  cursor: pointer;
+  padding: 1px;
+}
+
+.prop-color .prop-input { flex: 1; }
+
+/* ── CANVAS STATUS BAR ── */
+#canvas-statusbar {
+  height: 24px;
+  background: var(--bg-header);
+  border-top: 1px solid var(--border);
+  display: flex;
+  align-items: center;
+  padding: 0 10px;
+  gap: 16px;
+  font-size: 11px;
+  color: var(--text-muted);
+  flex-shrink: 0;
+}
+
+#canvas-statusbar span { display: flex; align-items: center; gap: 4px; }
+
+.zoom-controls { display: flex; align-items: center; gap: 4px; margin-left: auto; }
+.zoom-controls button {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  color: var(--text-muted);
+  width: 20px; height: 20px;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 13px;
+  display: flex; align-items: center; justify-content: center;
+}
+
+.zoom-controls button:hover { color: var(--accent); }
+
+/* ── FOOTER ── */
+#footer {
+  height: var(--footer-h);
+  background: var(--bg-header);
+  border-top: 1px solid var(--border);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 11px;
+  color: var(--text-muted);
+  flex-shrink: 0;
+  gap: 4px;
+}
+
+#footer a { color: var(--accent); text-decoration: none; }
+#footer a:hover { text-decoration: underline; }
+
+/* ── MODALS ── */
+.modal-overlay {
+  position: fixed; inset: 0;
+  background: rgba(0,0,0,.6);
+  display: flex; align-items: center; justify-content: center;
+  z-index: 1000;
+}
+
+.modal {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 24px;
+  min-width: 340px;
+  max-width: 480px;
+  width: 90%;
+}
+
+.modal h2 { font-size: 16px; margin-bottom: 16px; color: var(--text-primary); }
+
+.modal-actions {
+  display: flex; gap: 8px; justify-content: flex-end; margin-top: 16px;
+}
+
+.form-group { margin-bottom: 12px; }
+.form-label { font-size: 12px; color: var(--text-muted); margin-bottom: 4px; display: block; }
+
+.form-input {
+  width: 100%;
+  background: var(--bg-sidebar);
+  border: 1px solid var(--border);
+  color: var(--text-primary);
+  padding: 7px 10px;
+  border-radius: 6px;
+  font-size: 13px;
+}
+
+.form-input:focus { outline: 1px solid var(--accent); }
+
+.form-select {
+  width: 100%;
+  background: var(--bg-sidebar);
+  border: 1px solid var(--border);
+  color: var(--text-primary);
+  padding: 7px 8px;
+  border-radius: 6px;
+  font-size: 13px;
+}
+
+/* ── EMPTY STATE ── */
+.empty-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+  gap: 12px;
+  color: var(--text-muted);
+}
+
+.empty-state .big-icon { font-size: 48px; opacity: .3; }
+.empty-state p { font-size: 13px; text-align: center; max-width: 200px; line-height: 1.5; }
+
+/* ── SCROLLBAR ── */
+::-webkit-scrollbar { width: 5px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
+
+/* ── TOAST ── */
+#toast {
+  position: fixed;
+  bottom: 40px;
+  left: 50%;
+  transform: translateX(-50%) translateY(20px);
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  color: var(--text-primary);
+  padding: 8px 16px;
+  border-radius: 8px;
+  font-size: 12px;
+  opacity: 0;
+  transition: all .25s;
+  z-index: 9999;
+  pointer-events: none;
+  box-shadow: 0 4px 20px rgba(0,0,0,.4);
+}
+
+#toast.show {
+  opacity: 1;
+  transform: translateX(-50%) translateY(0);
+}
+
+/* ── DEVICE PRESETS ── */
+.device-presets {
+  display: flex; gap: 4px; align-items: center;
+}
+
+.device-presets select {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  color: var(--text-muted);
+  padding: 3px 6px;
+  border-radius: 5px;
+  font-size: 11px;
+}
+</style>
+</head>
+<body>
+
+<!-- HEADER -->
+<div id="header">
+  <div class="logo">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+      <rect x="3" y="3" width="18" height="18" rx="3"/>
+      <path d="M3 9h18M9 21V9"/>
+    </svg>
+    Mockups Builder
+  </div>
+
+  <select id="project-selector">
+    <option value="">— Seleccionar proyecto —</option>
+  </select>
+
+  <div class="header-spacer"></div>
+
+  <div class="device-presets">
+    <select id="device-preset" title="Preset de dispositivo">
+      <option value="1280,800">Web 1280×800</option>
+      <option value="1440,900">Web 1440×900</option>
+      <option value="375,812">Mobile 375×812</option>
+      <option value="390,844">Mobile 390×844</option>
+      <option value="768,1024">Tablet 768×1024</option>
+    </select>
+  </div>
+
+  <button class="btn btn-ghost btn-sm" onclick="exportPNG()" title="Exportar PNG">⬇ PNG</button>
+  <button class="btn btn-ghost btn-sm" onclick="downloadBackup()" title="Descargar backup">💾 Backup</button>
+  <label class="btn btn-ghost btn-sm" style="cursor:pointer" title="Cargar backup">
+    📂 Cargar
+    <input type="file" accept=".json" style="display:none" onchange="loadBackup(event)">
+  </label>
+  <button class="btn btn-primary btn-sm" onclick="openNewProjectModal()">+ Proyecto</button>
+</div>
+
+<!-- BODY -->
+<div id="body">
+
+  <!-- SIDEBAR -->
+  <div id="sidebar">
+
+    <!-- GRUPOS -->
+    <div class="sidebar-section">
+      <div class="sidebar-section-header">
+        <span>Grupos</span>
+        <button onclick="openNewGroupModal()" title="Nuevo grupo">+</button>
+      </div>
+      <div class="sidebar-list" id="groups-list"></div>
+    </div>
+
+    <!-- MOCKUPS -->
+    <div class="sidebar-section" style="flex:1;display:flex;flex-direction:column;overflow:hidden">
+      <div class="sidebar-section-header">
+        <span>Mockups</span>
+        <button onclick="openNewMockupModal()" title="Nuevo mockup">+</button>
+      </div>
+      <div class="sidebar-list" id="mockups-list" style="max-height:none;flex:1"></div>
+    </div>
+
+  </div>
+
+  <!-- CANVAS AREA -->
+  <div id="canvas-area">
+    <!-- TOOLBAR -->
+    <div id="canvas-toolbar">
+      <span style="font-size:11px;color:var(--text-muted);margin-right:4px">Widgets:</span>
+      <button class="widget-btn" onclick="addWidget('text')"><span class="wicon">T</span>Texto</button>
+      <button class="widget-btn" onclick="addWidget('label')"><span class="wicon">🏷</span>Label</button>
+      <button class="widget-btn" onclick="addWidget('input')"><span class="wicon">▭</span>Input</button>
+      <button class="widget-btn" onclick="addWidget('textarea')"><span class="wicon">≡</span>Textarea</button>
+      <button class="widget-btn" onclick="addWidget('button')"><span class="wicon">⬛</span>Botón</button>
+      <button class="widget-btn" onclick="addWidget('select')"><span class="wicon">▾</span>Select</button>
+      <button class="widget-btn" onclick="addWidget('checkbox')"><span class="wicon">☑</span>Check</button>
+      <button class="widget-btn" onclick="addWidget('radio')"><span class="wicon">◉</span>Radio</button>
+      <button class="widget-btn" onclick="addWidget('image')"><span class="wicon">🖼</span>Imagen</button>
+      <button class="widget-btn" onclick="addWidget('rectangle')"><span class="wicon">□</span>Rect</button>
+      <button class="widget-btn" onclick="addWidget('navbar')"><span class="wicon">☰</span>Navbar</button>
+      <button class="widget-btn" onclick="addWidget('card')"><span class="wicon">🗂</span>Card</button>
+      <button class="widget-btn" onclick="addWidget('separator')"><span class="wicon">—</span>Línea</button>
+    </div>
+
+    <!-- CANVAS WRAPPER -->
+    <div id="canvas-wrapper">
+      <div id="canvas-placeholder" class="empty-state" style="width:100%;min-height:300px">
+        <div class="big-icon">🖼</div>
+        <p>Selecciona o crea un mockup para comenzar a diseñar</p>
+      </div>
+      <div id="canvas-frame" style="display:none"></div>
+    </div>
+
+    <!-- STATUS BAR -->
+    <div id="canvas-statusbar">
+      <span id="sb-mockup">Sin mockup</span>
+      <span id="sb-size"></span>
+      <span id="sb-el"></span>
+      <div class="zoom-controls">
+        <button onclick="setZoom(zoom-10)" title="Alejar">−</button>
+        <span id="zoom-label">100%</span>
+        <button onclick="setZoom(zoom+10)" title="Acercar">+</button>
+        <button onclick="setZoom(100)" title="Reset zoom" style="font-size:10px;width:auto;padding:0 4px">1:1</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- PROPS PANEL -->
+  <div id="props-panel">
+    <h3>Propiedades</h3>
+    <div id="props-content">
+      <p class="no-selection">Selecciona un elemento en el canvas para editar sus propiedades</p>
+    </div>
+  </div>
+
+</div>
+
+<!-- FOOTER -->
+<div id="footer">
+  Creado por <a href="https://andyjara.dev" target="_blank">andyjara.dev</a>&nbsp;—&nbsp;Licencia <a href="https://creativecommons.org/licenses/by/4.0/" target="_blank">CC BY</a>
+</div>
+
+<div id="toast"></div>
+
+<!-- MODALS -->
+<div id="modal-container"></div>
+
+<script>
+/* ═══════════════════════════════════════════════
+   STORAGE
+═══════════════════════════════════════════════ */
+const STORAGE_KEY = 'mockups_data_v1';
+
+function loadData() {
+  try {
+    const raw = localStorage.getItem(STORAGE_KEY);
+    return raw ? JSON.parse(raw) : { projects: [] };
+  } catch { return { projects: [] }; }
+}
+
+function saveData() {
+  localStorage.setItem(STORAGE_KEY, JSON.stringify(appData));
+}
+
+function downloadBackup() {
+  const json = JSON.stringify(appData, null, 2);
+  const blob = new Blob([json], { type: 'application/json' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = `mockups-backup-${new Date().toISOString().slice(0,10)}.json`;
+  a.click();
+  URL.revokeObjectURL(url);
+  showToast('Backup descargado');
+}
+
+function loadBackup(e) {
+  const file = e.target.files[0];
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = ev => {
+    try {
+      const data = JSON.parse(ev.target.result);
+      if (!data.projects) throw new Error('Formato inválido');
+      appData = data;
+      saveData();
+      state.activeProject = null;
+      state.activeGroup = null;
+      state.activeMockup = null;
+      state.selectedEl = null;
+      renderAll();
+      showToast('Backup cargado exitosamente');
+    } catch {
+      showToast('Error: archivo inválido');
+    }
+  };
+  reader.readAsText(file);
+  e.target.value = '';
+}
+
+/* ═══════════════════════════════════════════════
+   STATE
+═══════════════════════════════════════════════ */
+let appData = loadData();
+
+const state = {
+  activeProject: null,
+  activeGroup: null,
+  activeMockup: null,
+  selectedEl: null,
+};
+
+let zoom = 100;
+
+function uid() {
+  return Date.now().toString(36) + Math.random().toString(36).slice(2,7);
+}
+
+function getActiveProject() {
+  return appData.projects.find(p => p.id === state.activeProject) || null;
+}
+
+function getActiveGroup() {
+  const proj = getActiveProject();
+  return proj ? proj.groups.find(g => g.id === state.activeGroup) || null : null;
+}
+
+function getActiveMockup() {
+  const grp = getActiveGroup();
+  return grp ? grp.mockups.find(m => m.id === state.activeMockup) || null : null;
+}
+
+/* ═══════════════════════════════════════════════
+   RENDER ALL
+═══════════════════════════════════════════════ */
+function renderAll() {
+  renderProjectSelector();
+  renderGroupsList();
+  renderMockupsList();
+  renderCanvas();
+}
+
+/* ═══════════════════════════════════════════════
+   PROJECT SELECTOR (HEADER)
+═══════════════════════════════════════════════ */
+function renderProjectSelector() {
+  const sel = document.getElementById('project-selector');
+  sel.innerHTML = '<option value="">— Seleccionar proyecto —</option>';
+  appData.projects.forEach(p => {
+    const opt = document.createElement('option');
+    opt.value = p.id;
+    opt.textContent = p.name;
+    if (p.id === state.activeProject) opt.selected = true;
+    sel.appendChild(opt);
+  });
+}
+
+document.getElementById('project-selector').addEventListener('change', function() {
+  state.activeProject = this.value || null;
+  state.activeGroup = null;
+  state.activeMockup = null;
+  state.selectedEl = null;
+  const proj = getActiveProject();
+  if (proj && proj.groups.length > 0) {
+    state.activeGroup = proj.groups[0].id;
+  }
+  renderGroupsList();
+  renderMockupsList();
+  renderCanvas();
+});
+
+/* ═══════════════════════════════════════════════
+   GROUPS
+═══════════════════════════════════════════════ */
+function renderGroupsList() {
+  const list = document.getElementById('groups-list');
+  list.innerHTML = '';
+  const proj = getActiveProject();
+  if (!proj) { list.innerHTML = '<div style="padding:8px 10px;font-size:11px;color:var(--text-muted)">Sin proyecto</div>'; return; }
+  if (!proj.groups.length) { list.innerHTML = '<div style="padding:8px 10px;font-size:11px;color:var(--text-muted)">Sin grupos</div>'; return; }
+
+  proj.groups.forEach(g => {
+    const div = document.createElement('div');
+    div.className = 'sidebar-item' + (g.id === state.activeGroup ? ' active' : '');
+    div.innerHTML = `
+      <span class="device-icon">📁</span>
+      <span class="item-name" title="${g.name}">${g.name}</span>
+      <span class="item-actions">
+        <button onclick="renameGroup('${g.id}')" title="Renombrar">✏</button>
+        <button onclick="deleteGroup('${g.id}')" title="Eliminar" style="color:var(--danger)">✕</button>
+      </span>`;
+    div.addEventListener('click', (e) => {
+      if (e.target.tagName === 'BUTTON') return;
+      state.activeGroup = g.id;
+      state.activeMockup = null;
+      state.selectedEl = null;
+      renderGroupsList();
+      renderMockupsList();
+      renderCanvas();
+    });
+    list.appendChild(div);
+  });
+}
+
+function openNewGroupModal() {
+  if (!state.activeProject) { showToast('Selecciona un proyecto primero'); return; }
+  showModal('Nuevo Grupo', `
+    <div class="form-group">
+      <label class="form-label">Nombre del grupo</label>
+      <input class="form-input" id="m-group-name" placeholder="Ej: Módulo de Autenticación" autofocus>
+    </div>
+    <div class="form-group">
+      <label class="form-label">Descripción (opcional)</label>
+      <input class="form-input" id="m-group-desc" placeholder="Descripción...">
+    </div>
+  `, () => {
+    const name = document.getElementById('m-group-name').value.trim();
+    if (!name) { showToast('El nombre es requerido'); return false; }
+    const proj = getActiveProject();
+    const g = { id: uid(), name, description: document.getElementById('m-group-desc').value.trim(), mockups: [] };
+    proj.groups.push(g);
+    state.activeGroup = g.id;
+    saveData();
+    renderGroupsList();
+    renderMockupsList();
+  });
+}
+
+function renameGroup(id) {
+  const proj = getActiveProject();
+  const g = proj.groups.find(x => x.id === id);
+  showModal('Renombrar Grupo', `
+    <div class="form-group">
+      <label class="form-label">Nombre</label>
+      <input class="form-input" id="m-rename" value="${g.name}" autofocus>
+    </div>
+  `, () => {
+    const name = document.getElementById('m-rename').value.trim();
+    if (!name) { showToast('El nombre es requerido'); return false; }
+    g.name = name;
+    saveData();
+    renderGroupsList();
+  });
+}
+
+function deleteGroup(id) {
+  if (!confirm('¿Eliminar este grupo y todos sus mockups?')) return;
+  const proj = getActiveProject();
+  proj.groups = proj.groups.filter(g => g.id !== id);
+  if (state.activeGroup === id) { state.activeGroup = proj.groups[0]?.id || null; state.activeMockup = null; }
+  saveData();
+  renderGroupsList();
+  renderMockupsList();
+  renderCanvas();
+}
+
+/* ═══════════════════════════════════════════════
+   MOCKUPS
+═══════════════════════════════════════════════ */
+function renderMockupsList() {
+  const list = document.getElementById('mockups-list');
+  list.innerHTML = '';
+  const grp = getActiveGroup();
+  if (!grp) { list.innerHTML = '<div style="padding:8px 10px;font-size:11px;color:var(--text-muted)">Sin grupo</div>'; return; }
+  if (!grp.mockups.length) { list.innerHTML = '<div style="padding:8px 10px;font-size:11px;color:var(--text-muted)">Sin mockups</div>'; return; }
+
+  grp.mockups.forEach(m => {
+    const div = document.createElement('div');
+    div.className = 'sidebar-item' + (m.id === state.activeMockup ? ' active' : '');
+    div.innerHTML = `
+      <div class="mockup-thumb"></div>
+      <span class="item-name" title="${m.name}">${m.name}<br><small style="color:var(--text-muted);font-size:10px">${m.deviceType === 'mobile' ? '📱' : '🖥'} ${m.canvasWidth}×${m.canvasHeight}</small></span>
+      <span class="item-actions">
+        <button onclick="renameMockup('${m.id}')" title="Renombrar">✏</button>
+        <button onclick="deleteMockup('${m.id}')" title="Eliminar" style="color:var(--danger)">✕</button>
+      </span>`;
+    div.addEventListener('click', (e) => {
+      if (e.target.tagName === 'BUTTON') return;
+      state.activeMockup = m.id;
+      state.selectedEl = null;
+      renderMockupsList();
+      renderCanvas();
+    });
+    list.appendChild(div);
+  });
+}
+
+function openNewMockupModal() {
+  if (!state.activeGroup) { showToast('Selecciona un grupo primero'); return; }
+  showModal('Nuevo Mockup', `
+    <div class="form-group">
+      <label class="form-label">Nombre</label>
+      <input class="form-input" id="m-name" placeholder="Ej: Pantalla de Login" autofocus>
+    </div>
+    <div class="form-group">
+      <label class="form-label">Tipo de dispositivo</label>
+      <select class="form-select" id="m-device" onchange="updateDeviceDims()">
+        <option value="web">Web — 1280×800</option>
+        <option value="web1440">Web — 1440×900</option>
+        <option value="mobile">Mobile — 375×812 (iPhone)</option>
+        <option value="mobile390">Mobile — 390×844</option>
+        <option value="tablet">Tablet — 768×1024</option>
+      </select>
+    </div>
+    <div class="form-group">
+      <label class="form-label">Descripción (opcional)</label>
+      <input class="form-input" id="m-desc" placeholder="Descripción...">
+    </div>
+  `, () => {
+    const name = document.getElementById('m-name').value.trim();
+    if (!name) { showToast('El nombre es requerido'); return false; }
+    const deviceMap = { web:[1280,800,'web'], web1440:[1440,900,'web'], mobile:[375,812,'mobile'], mobile390:[390,844,'mobile'], tablet:[768,1024,'tablet'] };
+    const dev = document.getElementById('m-device').value;
+    const [w, h, type] = deviceMap[dev];
+    const grp = getActiveGroup();
+    const m = { id: uid(), name, description: document.getElementById('m-desc').value.trim(), deviceType: type, canvasWidth: w, canvasHeight: h, elements: [] };
+    grp.mockups.push(m);
+    state.activeMockup = m.id;
+    saveData();
+    renderMockupsList();
+    renderCanvas();
+  });
+}
+
+function renameMockup(id) {
+  const grp = getActiveGroup();
+  const m = grp.mockups.find(x => x.id === id);
+  showModal('Renombrar Mockup', `
+    <div class="form-group">
+      <label class="form-label">Nombre</label>
+      <input class="form-input" id="m-rename" value="${m.name}" autofocus>
+    </div>
+    <div class="form-group">
+      <label class="form-label">Descripción</label>
+      <input class="form-input" id="m-desc" value="${m.description || ''}">
+    </div>
+  `, () => {
+    const name = document.getElementById('m-rename').value.trim();
+    if (!name) { showToast('El nombre es requerido'); return false; }
+    m.name = name;
+    m.description = document.getElementById('m-desc').value.trim();
+    saveData();
+    renderMockupsList();
+  });
+}
+
+function deleteMockup(id) {
+  if (!confirm('¿Eliminar este mockup?')) return;
+  const grp = getActiveGroup();
+  grp.mockups = grp.mockups.filter(m => m.id !== id);
+  if (state.activeMockup === id) { state.activeMockup = null; state.selectedEl = null; }
+  saveData();
+  renderMockupsList();
+  renderCanvas();
+}
+
+/* ═══════════════════════════════════════════════
+   PROJECT MODAL
+═══════════════════════════════════════════════ */
+function openNewProjectModal() {
+  showModal('Nuevo Proyecto', `
+    <div class="form-group">
+      <label class="form-label">Nombre del proyecto</label>
+      <input class="form-input" id="m-pname" placeholder="Ej: Sistema de Ventas" autofocus>
+    </div>
+    <div class="form-group">
+      <label class="form-label">Descripción (opcional)</label>
+      <input class="form-input" id="m-pdesc" placeholder="Descripción del proyecto...">
+    </div>
+  `, () => {
+    const name = document.getElementById('m-pname').value.trim();
+    if (!name) { showToast('El nombre es requerido'); return false; }
+    const p = { id: uid(), name, description: document.getElementById('m-pdesc').value.trim(), createdAt: new Date().toISOString(), groups: [] };
+    appData.projects.push(p);
+    state.activeProject = p.id;
+    state.activeGroup = null;
+    state.activeMockup = null;
+    saveData();
+    renderAll();
+    document.getElementById('project-selector').value = p.id;
+  });
+}
+
+/* ═══════════════════════════════════════════════
+   CANVAS RENDER
+═══════════════════════════════════════════════ */
+function renderCanvas() {
+  const frame = document.getElementById('canvas-frame');
+  const placeholder = document.getElementById('canvas-placeholder');
+  const mockup = getActiveMockup();
+
+  if (!mockup) {
+    frame.style.display = 'none';
+    placeholder.style.display = 'flex';
+    document.getElementById('sb-mockup').textContent = 'Sin mockup';
+    document.getElementById('sb-size').textContent = '';
+    document.getElementById('sb-el').textContent = '';
+    renderPropsPanel(null);
+    return;
+  }
+
+  placeholder.style.display = 'none';
+  frame.style.display = 'block';
+  frame.style.width = mockup.canvasWidth + 'px';
+  frame.style.height = mockup.canvasHeight + 'px';
+  frame.className = 'canvas-frame' + (mockup.deviceType === 'mobile' ? ' mobile-frame' : '');
+  applyZoom();
+
+  document.getElementById('sb-mockup').textContent = mockup.name;
+  document.getElementById('sb-size').textContent = `${mockup.canvasWidth}×${mockup.canvasHeight}`;
+
+  // render elements
+  const existing = new Set();
+  mockup.elements.forEach(el => {
+    existing.add(el.id);
+    let dom = document.getElementById('el-' + el.id);
+    if (!dom) {
+      dom = createElDom(el);
+      frame.appendChild(dom);
+    }
+    updateElDom(dom, el);
+  });
+
+  // remove deleted
+  Array.from(frame.querySelectorAll('.canvas-el')).forEach(dom => {
+    const id = dom.id.replace('el-', '');
+    if (!existing.has(id)) dom.remove();
+  });
+
+  updateSelectedHighlight();
+  renderPropsPanel(state.selectedEl);
+}
+
+function createElDom(el) {
+  const dom = document.createElement('div');
+  dom.id = 'el-' + el.id;
+  dom.className = 'canvas-el';
+
+  // resize handles
+  ['nw','n','ne','e','se','s','sw','w'].forEach(dir => {
+    const h = document.createElement('div');
+    h.className = `resize-handle rh-${dir}`;
+    h.dataset.dir = dir;
+    dom.appendChild(h);
+  });
+
+  makeDraggable(dom, el);
+  makeResizable(dom, el);
+
+  dom.addEventListener('mousedown', (e) => {
+    if (e.target.classList.contains('resize-handle')) return;
+    e.stopPropagation();
+    state.selectedEl = el.id;
+    updateSelectedHighlight();
+    renderPropsPanel(el.id);
+    document.getElementById('sb-el').textContent = `${el.type} (${el.x},${el.y})`;
+  });
+
+  return dom;
+}
+
+function updateElDom(dom, el) {
+  dom.style.left = el.x + 'px';
+  dom.style.top = el.y + 'px';
+  dom.style.width = el.width + 'px';
+  dom.style.height = el.height + 'px';
+  dom.style.zIndex = el.zIndex || 1;
+
+  // update inner content (preserve handles)
+  const handles = Array.from(dom.querySelectorAll('.resize-handle'));
+  dom.innerHTML = '';
+  handles.forEach(h => dom.appendChild(h));
+  const inner = renderWidget(el);
+  if (inner) dom.appendChild(inner);
+}
+
+function renderWidget(el) {
+  const { type, props } = el;
+  let div = document.createElement('div');
+  div.style.width = '100%';
+  div.style.height = '100%';
+  div.style.pointerEvents = 'none';
+  div.style.overflow = 'hidden';
+
+  switch (type) {
+    case 'text':
+      div.className = 'w-text';
+      div.style.fontSize = (props.fontSize || 14) + 'px';
+      div.style.color = props.color || '#1e293b';
+      div.style.fontWeight = props.bold ? '700' : 'normal';
+      div.style.fontStyle = props.italic ? 'italic' : 'normal';
+      div.textContent = props.text || 'Texto de ejemplo';
+      break;
+
+    case 'label':
+      div.className = 'w-label';
+      div.style.fontSize = (props.fontSize || 12) + 'px';
+      div.style.color = props.color || '#475569';
+      div.textContent = props.text || 'Label';
+      break;
+
+    case 'input':
+      div.className = 'w-input';
+      div.style.borderRadius = (props.radius || 5) + 'px';
+      div.style.borderColor = props.borderColor || '#cbd5e1';
+      div.textContent = props.placeholder || 'Ingresa texto...';
+      div.style.color = '#94a3b8';
+      break;
+
+    case 'textarea':
+      div.className = 'w-textarea';
+      div.style.borderRadius = (props.radius || 5) + 'px';
+      div.textContent = props.placeholder || 'Área de texto...';
+      div.style.color = '#94a3b8';
+      break;
+
+    case 'button':
+      div.className = 'w-btn ' + (props.variant || 'primary');
+      div.style.fontSize = (props.fontSize || 13) + 'px';
+      div.style.borderRadius = (props.radius || 6) + 'px';
+      div.textContent = props.text || 'Botón';
+      break;
+
+    case 'select':
+      div.className = 'w-select';
+      div.style.borderRadius = (props.radius || 5) + 'px';
+      const selTxt = document.createElement('span');
+      selTxt.textContent = props.placeholder || 'Seleccionar...';
+      selTxt.style.color = '#94a3b8';
+      const selArr = document.createElement('span');
+      selArr.textContent = '▾';
+      selArr.style.color = '#94a3b8';
+      div.appendChild(selTxt);
+      div.appendChild(selArr);
+      break;
+
+    case 'checkbox':
+      div.className = 'w-checkbox';
+      const cbBox = document.createElement('div');
+      cbBox.className = 'w-checkbox-box' + (props.checked ? ' checked' : '');
+      if (props.checked) cbBox.textContent = '✓';
+      const cbLabel = document.createElement('span');
+      cbLabel.textContent = props.text || 'Opción';
+      div.appendChild(cbBox);
+      div.appendChild(cbLabel);
+      break;
+
+    case 'radio':
+      div.className = 'w-radio';
+      const rbCircle = document.createElement('div');
+      rbCircle.className = 'w-radio-circle' + (props.checked ? ' checked' : '');
+      const rbLabel = document.createElement('span');
+      rbLabel.textContent = props.text || 'Opción';
+      div.appendChild(rbCircle);
+      div.appendChild(rbLabel);
+      break;
+
+    case 'image':
+      div.className = 'w-image';
+      const imgIcon = document.createElement('div');
+      imgIcon.className = 'img-icon';
+      imgIcon.textContent = '🖼';
+      const imgLabel = document.createElement('div');
+      imgLabel.textContent = props.text || 'Imagen';
+      div.appendChild(imgIcon);
+      div.appendChild(imgLabel);
+      break;
+
+    case 'rectangle':
+      div.className = 'w-rect';
+      div.style.background = props.bg || '#e2e8f0';
+      div.style.border = `${props.borderWidth||0}px solid ${props.borderColor||'#cbd5e1'}`;
+      div.style.borderRadius = (props.radius || 6) + 'px';
+      div.style.opacity = props.opacity !== undefined ? props.opacity : 1;
+      break;
+
+    case 'separator':
+      div.className = 'w-separator';
+      const hr = document.createElement('hr');
+      hr.style.borderTopColor = props.color || '#e2e8f0';
+      hr.style.borderTopWidth = (props.thickness || 2) + 'px';
+      div.appendChild(hr);
+      break;
+
+    case 'navbar':
+      div.className = 'w-navbar';
+      div.style.background = props.bg || '#1e293b';
+      const brand = document.createElement('span');
+      brand.className = 'nav-brand';
+      brand.style.color = props.brandColor || '#38bdf8';
+      brand.textContent = props.brand || 'App';
+      const links = document.createElement('span');
+      links.className = 'nav-links';
+      (props.links || ['Inicio','Acerca','Contacto']).forEach((l,i) => {
+        const a = document.createElement('span');
+        a.className = 'nav-link' + (i===0?' active':'');
+        a.textContent = l;
+        links.appendChild(a);
+      });
+      div.appendChild(brand);
+      div.appendChild(links);
+      break;
+
+    case 'card':
+      div.className = 'w-card';
+      div.style.borderRadius = (props.radius || 10) + 'px';
+      const ct = document.createElement('div');
+      ct.className = 'card-title';
+      ct.textContent = props.title || 'Título de la Card';
+      const cb = document.createElement('div');
+      cb.className = 'card-body';
+      cb.textContent = props.body || 'Contenido de la card...';
+      div.appendChild(ct);
+      div.appendChild(cb);
+      break;
+
+    default:
+      div.textContent = type;
+  }
+
+  return div;
+}
+
+/* ═══════════════════════════════════════════════
+   DRAG & RESIZE
+═══════════════════════════════════════════════ */
+function makeDraggable(dom, el) {
+  let dragging = false, startX, startY, startEl;
+
+  dom.addEventListener('mousedown', (e) => {
+    if (e.target.classList.contains('resize-handle')) return;
+    dragging = true;
+    startX = e.clientX;
+    startY = e.clientY;
+    startEl = { x: el.x, y: el.y };
+    e.preventDefault();
+  });
+
+  document.addEventListener('mousemove', (e) => {
+    if (!dragging) return;
+    const scale = zoom / 100;
+    const dx = (e.clientX - startX) / scale;
+    const dy = (e.clientY - startY) / scale;
+    const mockup = getActiveMockup();
+    el.x = Math.max(0, Math.min(mockup.canvasWidth - el.width, Math.round(startEl.x + dx)));
+    el.y = Math.max(0, Math.min(mockup.canvasHeight - el.height, Math.round(startEl.y + dy)));
+    dom.style.left = el.x + 'px';
+    dom.style.top = el.y + 'px';
+    document.getElementById('sb-el').textContent = `${el.type} (${el.x},${el.y})`;
+    if (state.selectedEl === el.id) updatePositionProps(el);
+  });
+
+  document.addEventListener('mouseup', () => {
+    if (dragging) { dragging = false; saveData(); }
+  });
+}
+
+function makeResizable(dom, el) {
+  dom.querySelectorAll('.resize-handle').forEach(h => {
+    h.addEventListener('mousedown', (e) => {
+      e.stopPropagation();
+      const dir = h.dataset.dir;
+      const startX = e.clientX;
+      const startY = e.clientY;
+      const orig = { x: el.x, y: el.y, w: el.width, h: el.height };
+      const scale = zoom / 100;
+
+      const onMove = (e) => {
+        const dx = (e.clientX - startX) / scale;
+        const dy = (e.clientY - startY) / scale;
+        let nx = orig.x, ny = orig.y, nw = orig.w, nh = orig.h;
+
+        if (dir.includes('e')) nw = Math.max(20, orig.w + dx);
+        if (dir.includes('s')) nh = Math.max(12, orig.h + dy);
+        if (dir.includes('w')) { nw = Math.max(20, orig.w - dx); nx = orig.x + (orig.w - nw); }
+        if (dir.includes('n')) { nh = Math.max(12, orig.h - dy); ny = orig.y + (orig.h - nh); }
+
+        el.x = Math.round(nx); el.y = Math.round(ny);
+        el.width = Math.round(nw); el.height = Math.round(nh);
+        dom.style.left = el.x + 'px'; dom.style.top = el.y + 'px';
+        dom.style.width = el.width + 'px'; dom.style.height = el.height + 'px';
+        if (state.selectedEl === el.id) updatePositionProps(el);
+      };
+
+      const onUp = () => {
+        document.removeEventListener('mousemove', onMove);
+        document.removeEventListener('mouseup', onUp);
+        saveData();
+      };
+
+      document.addEventListener('mousemove', onMove);
+      document.addEventListener('mouseup', onUp);
+      e.preventDefault();
+    });
+  });
+}
+
+function updateSelectedHighlight() {
+  document.querySelectorAll('.canvas-el').forEach(dom => {
+    const id = dom.id.replace('el-', '');
+    dom.classList.toggle('selected', id === state.selectedEl);
+  });
+}
+
+/* click on canvas bg → deselect */
+document.getElementById('canvas-frame').addEventListener('mousedown', (e) => {
+  if (e.target === document.getElementById('canvas-frame') || e.target.id === 'canvas-frame') {
+    state.selectedEl = null;
+    updateSelectedHighlight();
+    renderPropsPanel(null);
+    document.getElementById('sb-el').textContent = '';
+  }
+});
+
+/* Delete key */
+document.addEventListener('keydown', (e) => {
+  if ((e.key === 'Delete' || e.key === 'Backspace') && state.selectedEl) {
+    const activeEl = document.activeElement;
+    if (activeEl && (activeEl.tagName === 'INPUT' || activeEl.tagName === 'TEXTAREA' || activeEl.tagName === 'SELECT')) return;
+    const mockup = getActiveMockup();
+    if (!mockup) return;
+    mockup.elements = mockup.elements.filter(el => el.id !== state.selectedEl);
+    const dom = document.getElementById('el-' + state.selectedEl);
+    if (dom) dom.remove();
+    state.selectedEl = null;
+    renderPropsPanel(null);
+    saveData();
+    showToast('Elemento eliminado');
+  }
+});
+
+/* ═══════════════════════════════════════════════
+   ADD WIDGET
+═══════════════════════════════════════════════ */
+const DEFAULTS = {
+  text:      { w:160, h:30, props:{ text:'Texto de ejemplo', fontSize:14, color:'#1e293b', bold:false, italic:false } },
+  label:     { w:120, h:24, props:{ text:'Label', fontSize:12, color:'#475569' } },
+  input:     { w:200, h:36, props:{ placeholder:'Ingresa texto...', radius:5, borderColor:'#cbd5e1' } },
+  textarea:  { w:200, h:80, props:{ placeholder:'Área de texto...', radius:5 } },
+  button:    { w:120, h:36, props:{ text:'Botón', variant:'primary', radius:6, fontSize:13 } },
+  select:    { w:180, h:36, props:{ placeholder:'Seleccionar...', radius:5 } },
+  checkbox:  { w:120, h:24, props:{ text:'Opción', checked:false } },
+  radio:     { w:120, h:24, props:{ text:'Opción', checked:false } },
+  image:     { w:120, h:90, props:{ text:'Imagen' } },
+  rectangle: { w:160, h:80, props:{ bg:'#e2e8f0', borderWidth:0, borderColor:'#cbd5e1', radius:6, opacity:1 } },
+  separator: { w:200, h:16, props:{ color:'#e2e8f0', thickness:2 } },
+  navbar:    { w:400, h:48, props:{ bg:'#1e293b', brand:'App', brandColor:'#38bdf8', links:['Inicio','Acerca','Contacto'] } },
+  card:      { w:220, h:120, props:{ title:'Título', body:'Contenido de la card...', radius:10 } },
+};
+
+function addWidget(type) {
+  const mockup = getActiveMockup();
+  if (!mockup) { showToast('Selecciona un mockup primero'); return; }
+  const def = DEFAULTS[type];
+  const el = {
+    id: uid(),
+    type,
+    x: Math.round(mockup.canvasWidth / 2 - def.w / 2),
+    y: Math.round(mockup.canvasHeight / 2 - def.h / 2),
+    width: def.w,
+    height: def.h,
+    zIndex: (mockup.elements.length + 1),
+    props: { ...def.props },
+  };
+  mockup.elements.push(el);
+  state.selectedEl = el.id;
+  saveData();
+
+  const frame = document.getElementById('canvas-frame');
+  const dom = createElDom(el);
+  frame.appendChild(dom);
+  updateElDom(dom, el);
+  updateSelectedHighlight();
+  renderPropsPanel(el.id);
+}
+
+/* ═══════════════════════════════════════════════
+   PROPS PANEL
+═══════════════════════════════════════════════ */
+function renderPropsPanel(elId) {
+  const content = document.getElementById('props-content');
+  if (!elId) {
+    content.innerHTML = '<p class="no-selection">Selecciona un elemento en el canvas para editar sus propiedades</p>';
+    return;
+  }
+  const mockup = getActiveMockup();
+  const el = mockup.elements.find(e => e.id === elId);
+  if (!el) { content.innerHTML = ''; return; }
+
+  let html = `
+    <div class="prop-group">
+      <div class="prop-label">Tipo</div>
+      <div style="font-size:12px;color:var(--accent)">${el.type}</div>
+    </div>
+    <div class="prop-row">
+      <div class="prop-group">
+        <div class="prop-label">X</div>
+        <input class="prop-input" type="number" id="p-x" value="${el.x}" onchange="updateElProp('x', +this.value, true)">
+      </div>
+      <div class="prop-group">
+        <div class="prop-label">Y</div>
+        <input class="prop-input" type="number" id="p-y" value="${el.y}" onchange="updateElProp('y', +this.value, true)">
+      </div>
+    </div>
+    <div class="prop-row">
+      <div class="prop-group">
+        <div class="prop-label">Ancho</div>
+        <input class="prop-input" type="number" id="p-w" value="${el.width}" onchange="updateElProp('width', +this.value, true)">
+      </div>
+      <div class="prop-group">
+        <div class="prop-label">Alto</div>
+        <input class="prop-input" type="number" id="p-h" value="${el.height}" onchange="updateElProp('height', +this.value, true)">
+      </div>
+    </div>
+    <div class="prop-group">
+      <div class="prop-label">Orden Z</div>
+      <input class="prop-input" type="number" id="p-z" value="${el.zIndex||1}" onchange="updateElProp('zIndex', +this.value, true)">
+    </div>
+    <hr style="border-color:var(--border);margin:8px 0">
+  `;
+
+  // type-specific props
+  const p = el.props;
+  switch (el.type) {
+    case 'text':
+    case 'label':
+      html += propText('text', 'Texto', p.text);
+      html += propNumber('fontSize', 'Tamaño fuente', p.fontSize || 14);
+      html += propColor('color', 'Color', p.color || '#1e293b');
+      if (el.type === 'text') {
+        html += `<div class="prop-group">
+          <div class="prop-label">Estilo</div>
+          <div style="display:flex;gap:6px">
+            <button class="btn btn-ghost btn-sm" style="${p.bold?'background:var(--bg-hover)':''}" onclick="toggleProp('bold')"><b>B</b></button>
+            <button class="btn btn-ghost btn-sm" style="${p.italic?'background:var(--bg-hover)':''}" onclick="toggleProp('italic')"><i>I</i></button>
+          </div>
+        </div>`;
+      }
+      break;
+
+    case 'input':
+    case 'textarea':
+      html += propText('placeholder', 'Placeholder', p.placeholder);
+      html += propNumber('radius', 'Radio bordes', p.radius || 5);
+      html += propColor('borderColor', 'Color borde', p.borderColor || '#cbd5e1');
+      break;
+
+    case 'button':
+      html += propText('text', 'Texto', p.text);
+      html += `<div class="prop-group">
+        <div class="prop-label">Variante</div>
+        <select class="prop-select" onchange="updateProp('variant', this.value)">
+          ${['primary','secondary','danger','outline'].map(v=>`<option value="${v}" ${p.variant===v?'selected':''}>${v}</option>`).join('')}
+        </select>
+      </div>`;
+      html += propNumber('fontSize', 'Tamaño fuente', p.fontSize || 13);
+      html += propNumber('radius', 'Radio bordes', p.radius || 6);
+      break;
+
+    case 'select':
+      html += propText('placeholder', 'Placeholder', p.placeholder);
+      html += propNumber('radius', 'Radio bordes', p.radius || 5);
+      break;
+
+    case 'checkbox':
+    case 'radio':
+      html += propText('text', 'Etiqueta', p.text);
+      html += `<div class="prop-group">
+        <div class="prop-label">Estado</div>
+        <label style="display:flex;align-items:center;gap:6px;cursor:pointer;font-size:12px">
+          <input type="checkbox" ${p.checked?'checked':''} onchange="updateProp('checked', this.checked)">
+          Marcado
+        </label>
+      </div>`;
+      break;
+
+    case 'image':
+      html += propText('text', 'Etiqueta', p.text);
+      break;
+
+    case 'rectangle':
+      html += propColor('bg', 'Fondo', p.bg || '#e2e8f0');
+      html += propNumber('radius', 'Radio bordes', p.radius || 6);
+      html += propNumber('borderWidth', 'Borde (px)', p.borderWidth || 0);
+      html += propColor('borderColor', 'Color borde', p.borderColor || '#cbd5e1');
+      html += `<div class="prop-group">
+        <div class="prop-label">Opacidad (0-1)</div>
+        <input class="prop-input" type="number" min="0" max="1" step="0.1" value="${p.opacity!==undefined?p.opacity:1}" onchange="updateProp('opacity', +this.value)">
+      </div>`;
+      break;
+
+    case 'separator':
+      html += propColor('color', 'Color', p.color || '#e2e8f0');
+      html += propNumber('thickness', 'Grosor', p.thickness || 2);
+      break;
+
+    case 'navbar':
+      html += propColor('bg', 'Fondo', p.bg || '#1e293b');
+      html += propText('brand', 'Marca', p.brand || 'App');
+      html += propColor('brandColor', 'Color marca', p.brandColor || '#38bdf8');
+      html += `<div class="prop-group">
+        <div class="prop-label">Links (separados por coma)</div>
+        <input class="prop-input" value="${(p.links||[]).join(',')}" onchange="updateProp('links', this.value.split(',').map(s=>s.trim()))">
+      </div>`;
+      break;
+
+    case 'card':
+      html += propText('title', 'Título', p.title || 'Título');
+      html += propText('body', 'Contenido', p.body || '');
+      html += propNumber('radius', 'Radio bordes', p.radius || 10);
+      break;
+  }
+
+  html += `<hr style="border-color:var(--border);margin:8px 0">
+    <button class="btn btn-danger btn-sm" style="width:100%" onclick="deleteSelectedEl()">🗑 Eliminar elemento</button>`;
+
+  content.innerHTML = html;
+}
+
+function propText(key, label, val) {
+  return `<div class="prop-group">
+    <div class="prop-label">${label}</div>
+    <input class="prop-input" type="text" value="${String(val||'').replace(/"/g,'&quot;')}" onchange="updateProp('${key}', this.value)">
+  </div>`;
+}
+
+function propNumber(key, label, val) {
+  return `<div class="prop-group">
+    <div class="prop-label">${label}</div>
+    <input class="prop-input" type="number" value="${val}" onchange="updateProp('${key}', +this.value)">
+  </div>`;
+}
+
+function propColor(key, label, val) {
+  return `<div class="prop-group">
+    <div class="prop-label">${label}</div>
+    <div class="prop-color">
+      <input type="color" value="${val}" onchange="updateProp('${key}', this.value); this.nextElementSibling.value=this.value">
+      <input class="prop-input" type="text" value="${val}" onchange="updateProp('${key}', this.value); this.previousElementSibling.value=this.value">
+    </div>
+  </div>`;
+}
+
+function updateProp(key, val) {
+  const mockup = getActiveMockup();
+  const el = mockup.elements.find(e => e.id === state.selectedEl);
+  if (!el) return;
+  el.props[key] = val;
+  const dom = document.getElementById('el-' + el.id);
+  if (dom) updateElDom(dom, el);
+  saveData();
+}
+
+function updateElProp(key, val, rerender) {
+  const mockup = getActiveMockup();
+  const el = mockup.elements.find(e => e.id === state.selectedEl);
+  if (!el) return;
+  el[key] = val;
+  const dom = document.getElementById('el-' + el.id);
+  if (dom) {
+    if (key === 'x') dom.style.left = val + 'px';
+    else if (key === 'y') dom.style.top = val + 'px';
+    else if (key === 'width') dom.style.width = val + 'px';
+    else if (key === 'height') dom.style.height = val + 'px';
+    else if (key === 'zIndex') dom.style.zIndex = val;
+  }
+  saveData();
+}
+
+function updatePositionProps(el) {
+  const px = document.getElementById('p-x');
+  const py = document.getElementById('p-y');
+  const pw = document.getElementById('p-w');
+  const ph = document.getElementById('p-h');
+  if (px) px.value = el.x;
+  if (py) py.value = el.y;
+  if (pw) pw.value = el.width;
+  if (ph) ph.value = el.height;
+}
+
+function toggleProp(key) {
+  const mockup = getActiveMockup();
+  const el = mockup.elements.find(e => e.id === state.selectedEl);
+  if (!el) return;
+  el.props[key] = !el.props[key];
+  const dom = document.getElementById('el-' + el.id);
+  if (dom) updateElDom(dom, el);
+  saveData();
+  renderPropsPanel(el.id);
+}
+
+function deleteSelectedEl() {
+  const mockup = getActiveMockup();
+  if (!mockup || !state.selectedEl) return;
+  mockup.elements = mockup.elements.filter(e => e.id !== state.selectedEl);
+  const dom = document.getElementById('el-' + state.selectedEl);
+  if (dom) dom.remove();
+  state.selectedEl = null;
+  renderPropsPanel(null);
+  saveData();
+  showToast('Elemento eliminado');
+}
+
+/* ═══════════════════════════════════════════════
+   ZOOM
+═══════════════════════════════════════════════ */
+function setZoom(val) {
+  zoom = Math.max(25, Math.min(200, val));
+  document.getElementById('zoom-label').textContent = zoom + '%';
+  applyZoom();
+}
+
+function applyZoom() {
+  const frame = document.getElementById('canvas-frame');
+  frame.style.transform = `scale(${zoom/100})`;
+  frame.style.transformOrigin = 'top left';
+}
+
+document.getElementById('canvas-wrapper').addEventListener('wheel', (e) => {
+  if (e.ctrlKey) {
+    e.preventDefault();
+    setZoom(zoom + (e.deltaY < 0 ? 10 : -10));
+  }
+}, { passive: false });
+
+/* Device preset change */
+document.getElementById('device-preset').addEventListener('change', function() {
+  const mockup = getActiveMockup();
+  if (!mockup) return;
+  const [w, h] = this.value.split(',').map(Number);
+  mockup.canvasWidth = w;
+  mockup.canvasHeight = h;
+  saveData();
+  renderCanvas();
+});
+
+/* ═══════════════════════════════════════════════
+   EXPORT PNG
+═══════════════════════════════════════════════ */
+async function exportPNG() {
+  const mockup = getActiveMockup();
+  if (!mockup) { showToast('Selecciona un mockup primero'); return; }
+
+  // Temporarily deselect to hide handles
+  const prevSelected = state.selectedEl;
+  state.selectedEl = null;
+  updateSelectedHighlight();
+
+  const frame = document.getElementById('canvas-frame');
+  const origTransform = frame.style.transform;
+  frame.style.transform = 'scale(1)';
+
+  try {
+    const canvas = await html2canvas(frame, {
+      scale: 2,
+      useCORS: true,
+      backgroundColor: '#f1f5f9',
+      width: mockup.canvasWidth,
+      height: mockup.canvasHeight,
+      logging: false,
+    });
+
+    // add watermark
+    const ctx = canvas.getContext('2d');
+    const wm = 'mockups by andyjara.dev';
+    ctx.save();
+    ctx.font = `${14 * 2}px -apple-system, sans-serif`;
+    ctx.fillStyle = 'rgba(100,116,139,0.55)';
+    ctx.textAlign = 'right';
+    ctx.textBaseline = 'bottom';
+    ctx.fillText(wm, canvas.width - 16, canvas.height - 12);
+    ctx.restore();
+
+    const url = canvas.toDataURL('image/png');
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `${mockup.name.replace(/\s+/g,'-')}.png`;
+    a.click();
+    showToast('PNG exportado');
+  } catch(e) {
+    showToast('Error al exportar: ' + e.message);
+  }
+
+  frame.style.transform = origTransform;
+  state.selectedEl = prevSelected;
+  updateSelectedHighlight();
+}
+
+/* ═══════════════════════════════════════════════
+   MODALS
+═══════════════════════════════════════════════ */
+function showModal(title, bodyHtml, onOk) {
+  const container = document.getElementById('modal-container');
+  const overlay = document.createElement('div');
+  overlay.className = 'modal-overlay';
+  overlay.innerHTML = `
+    <div class="modal">
+      <h2>${title}</h2>
+      ${bodyHtml}
+      <div class="modal-actions">
+        <button class="btn btn-ghost" id="modal-cancel">Cancelar</button>
+        <button class="btn btn-primary" id="modal-ok">Aceptar</button>
+      </div>
+    </div>
+  `;
+
+  overlay.querySelector('#modal-cancel').onclick = () => overlay.remove();
+  overlay.querySelector('#modal-ok').onclick = () => {
+    const result = onOk();
+    if (result !== false) overlay.remove();
+  };
+
+  overlay.addEventListener('keydown', e => {
+    if (e.key === 'Escape') overlay.remove();
+    if (e.key === 'Enter') overlay.querySelector('#modal-ok').click();
+  });
+
+  container.appendChild(overlay);
+
+  // focus first input
+  setTimeout(() => {
+    const first = overlay.querySelector('input[autofocus], input, select');
+    if (first) first.focus();
+  }, 50);
+}
+
+/* ═══════════════════════════════════════════════
+   TOAST
+═══════════════════════════════════════════════ */
+let toastTimer;
+function showToast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => t.classList.remove('show'), 2500);
+}
+
+/* ═══════════════════════════════════════════════
+   INIT
+═══════════════════════════════════════════════ */
+renderAll();
+
+// auto-select first project if exists
+if (appData.projects.length > 0 && !state.activeProject) {
+  state.activeProject = appData.projects[0].id;
+  document.getElementById('project-selector').value = state.activeProject;
+  const proj = getActiveProject();
+  if (proj.groups.length > 0) {
+    state.activeGroup = proj.groups[0].id;
+    const grp = getActiveGroup();
+    if (grp.mockups.length > 0) state.activeMockup = grp.mockups[0].id;
+  }
+  renderAll();
+}
+</script>
+</body>
+</html>
