@@ -1243,6 +1243,9 @@ function createElDom(el) {
         state.selectedEls.add(el.id);
         state.selectedEl = el.id;
       }
+    } else if (state.selectedEls.size > 1 && state.selectedEls.has(el.id)) {
+      // clicking an already-selected element in a group: keep group, just update active
+      state.selectedEl = el.id;
     } else {
       state.selectedEl = el.id;
       state.selectedEls = new Set([el.id]);
