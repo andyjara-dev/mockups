@@ -891,6 +891,7 @@ const state = {
   activeGroup: null,
   activeMockup: null,
   selectedEl: null,
+  selectedEls: new Set(),
 };
 
 let zoom = 100;
@@ -1233,10 +1234,30 @@ function createElDom(el) {
   dom.addEventListener('mousedown', (e) => {
     if (e.target.classList.contains('resize-handle')) return;
     e.stopPropagation();
-    state.selectedEl = el.id;
+    if (e.shiftKey) {
+      if (state.selectedEls.has(el.id)) {
+        state.selectedEls.delete(el.id);
+        if (state.selectedEl === el.id) state.selectedEl = [...state.selectedEls][0] || null;
+      } else {
+        if (state.selectedEl) state.selectedEls.add(state.selectedEl);
+        state.selectedEls.add(el.id);
+        state.selectedEl = el.id;
+      }
+    } else {
+      state.selectedEl = el.id;
+      state.selectedEls = new Set([el.id]);
+    }
     updateSelectedHighlight();
-    renderPropsPanel(el.id);
-    document.getElementById('sb-el').textContent = `${el.type} (${el.x},${el.y})`;
+    if (state.selectedEls.size > 1) renderMultiSelectPanel(state.selectedEls.size);
+    else renderPropsPanel(el.id);
+    document.getElementById('sb-el').textContent = state.selectedEls.size > 1
+      ? state.selectedEls.size + ' elementos seleccionados'
+      : el.type + ' (' + el.x + ',' + el.y + ')';
+  });
+
+  dom.addEventListener('dblclick', (e) => {
+    e.stopPropagation();
+    startInlineEdit(el);
   });
 
   return dom;
@@ -1339,14 +1360,23 @@ function renderWidget(el) {
       break;
 
     case 'image':
-      div.className = 'w-image';
-      const imgIcon = document.createElement('div');
-      imgIcon.className = 'img-icon';
-      imgIcon.textContent = '🖼';
-      const imgLabel = document.createElement('div');
-      imgLabel.textContent = props.text || 'Imagen';
-      div.appendChild(imgIcon);
-      div.appendChild(imgLabel);
+      if (props.src) {
+        const actualImg = document.createElement('img');
+        actualImg.src = props.src;
+        actualImg.style.cssText = 'width:100%;height:100%;object-fit:contain;display:block;border-radius:4px;pointer-events:none';
+        div.style.background = 'transparent';
+        div.style.border = 'none';
+        div.appendChild(actualImg);
+      } else {
+        div.className = 'w-image';
+        const imgIcon = document.createElement('div');
+        imgIcon.className = 'img-icon';
+        imgIcon.textContent = '🖼';
+        const imgLabel = document.createElement('div');
+        imgLabel.textContent = props.text || 'Imagen';
+        div.appendChild(imgIcon);
+        div.appendChild(imgLabel);
+      }
       break;
 
     case 'rectangle':
@@ -1408,7 +1438,7 @@ function renderWidget(el) {
    DRAG & RESIZE
 ═══════════════════════════════════════════════ */
 function makeDraggable(dom, el) {
-  let dragging = false, startX, startY, startEl;
+  let dragging = false, startX, startY, startEl, startPositions = {};
 
   dom.addEventListener('mousedown', (e) => {
     if (e.target.classList.contains('resize-handle')) return;
@@ -1416,6 +1446,14 @@ function makeDraggable(dom, el) {
     startX = e.clientX;
     startY = e.clientY;
     startEl = { x: el.x, y: el.y };
+    startPositions = {};
+    const mockup = getActiveMockup();
+    if (mockup && state.selectedEls.size > 1 && state.selectedEls.has(el.id)) {
+      state.selectedEls.forEach(id => {
+        const other = mockup.elements.find(e => e.id === id);
+        if (other) startPositions[id] = { x: other.x, y: other.y };
+      });
+    }
     e.preventDefault();
   });
 
@@ -1429,7 +1467,18 @@ function makeDraggable(dom, el) {
     el.y = Math.max(0, Math.min(mockup.canvasHeight - el.height, Math.round(startEl.y + dy)));
     dom.style.left = el.x + 'px';
     dom.style.top = el.y + 'px';
-    document.getElementById('sb-el').textContent = `${el.type} (${el.x},${el.y})`;
+    if (state.selectedEls.size > 1 && state.selectedEls.has(el.id)) {
+      state.selectedEls.forEach(id => {
+        if (id === el.id) return;
+        const other = mockup.elements.find(e => e.id === id);
+        const sp = startPositions[id];
+        if (!other || !sp) return;
+        other.x = Math.max(0, Math.min(mockup.canvasWidth - other.width, Math.round(sp.x + dx)));
+        other.y = Math.max(0, Math.min(mockup.canvasHeight - other.height, Math.round(sp.y + dy)));
+        const d = document.getElementById('el-' + id);
+        if (d) { d.style.left = other.x + 'px'; d.style.top = other.y + 'px'; }
+      });
+    }
     if (state.selectedEl === el.id) updatePositionProps(el);
   });
 
@@ -1481,34 +1530,41 @@ function makeResizable(dom, el) {
 function updateSelectedHighlight() {
   document.querySelectorAll('.canvas-el').forEach(dom => {
     const id = dom.id.replace('el-', '');
-    dom.classList.toggle('selected', id === state.selectedEl);
+    dom.classList.toggle('selected', id === state.selectedEl || state.selectedEls.has(id));
   });
 }
 
 /* click on canvas bg → deselect */
 document.getElementById('canvas-frame').addEventListener('mousedown', (e) => {
   if (e.target === document.getElementById('canvas-frame') || e.target.id === 'canvas-frame') {
-    state.selectedEl = null;
-    updateSelectedHighlight();
-    renderPropsPanel(null);
-    document.getElementById('sb-el').textContent = '';
+    if (!e.shiftKey) {
+      state.selectedEl = null;
+      state.selectedEls.clear();
+      updateSelectedHighlight();
+      renderPropsPanel(null);
+      document.getElementById('sb-el').textContent = '';
+    }
   }
 });
 
 /* Delete key */
 document.addEventListener('keydown', (e) => {
-  if ((e.key === 'Delete' || e.key === 'Backspace') && state.selectedEl) {
+  if (e.key === 'Delete' || e.key === 'Backspace') {
     const activeEl = document.activeElement;
     if (activeEl && (activeEl.tagName === 'INPUT' || activeEl.tagName === 'TEXTAREA' || activeEl.tagName === 'SELECT')) return;
     const mockup = getActiveMockup();
     if (!mockup) return;
-    mockup.elements = mockup.elements.filter(el => el.id !== state.selectedEl);
-    const dom = document.getElementById('el-' + state.selectedEl);
-    if (dom) dom.remove();
+    const toDelete = new Set(state.selectedEls);
+    if (state.selectedEl) toDelete.add(state.selectedEl);
+    if (!toDelete.size) return;
+    mockup.elements = mockup.elements.filter(el => !toDelete.has(el.id));
+    toDelete.forEach(id => { const d = document.getElementById('el-' + id); if (d) d.remove(); });
+    const n = toDelete.size;
     state.selectedEl = null;
+    state.selectedEls.clear();
     renderPropsPanel(null);
     saveData();
-    showToast('Elemento eliminado');
+    showToast(n > 1 ? n + ' elementos eliminados' : 'Elemento eliminado');
   }
 });
 
@@ -1918,6 +1974,185 @@ function showToast(msg) {
   clearTimeout(toastTimer);
   toastTimer = setTimeout(() => t.classList.remove('show'), 2500);
 }
+
+/* ═══════════════════════════════════════════════
+   MULTI-SELECT PANEL
+═══════════════════════════════════════════════ */
+function renderMultiSelectPanel(count) {
+  document.getElementById('props-content').innerHTML =
+    '<div style="color:var(--accent);font-weight:600;margin-bottom:12px">' + count + ' elementos seleccionados</div>' +
+    '<p style="font-size:11px;color:var(--text-muted);margin-bottom:12px;line-height:1.5">Shift+Click para agregar/quitar.<br>Arrastra cualquier elemento para mover el grupo.</p>' +
+    '<hr style="border-color:var(--border);margin-bottom:12px">' +
+    '<button class="btn btn-danger btn-sm" style="width:100%" onclick="deleteSelectedGroup()">🗑 Eliminar ' + count + ' elementos</button>';
+}
+
+function deleteSelectedGroup() {
+  const mockup = getActiveMockup();
+  if (!mockup) return;
+  const toDelete = new Set(state.selectedEls);
+  if (state.selectedEl) toDelete.add(state.selectedEl);
+  mockup.elements = mockup.elements.filter(e => !toDelete.has(e.id));
+  toDelete.forEach(id => { const d = document.getElementById('el-' + id); if (d) d.remove(); });
+  const n = toDelete.size;
+  state.selectedEl = null; state.selectedEls.clear();
+  renderPropsPanel(null); saveData();
+  showToast(n + ' elementos eliminados');
+}
+
+/* ═══════════════════════════════════════════════
+   RUBBER-BAND SELECTION
+═══════════════════════════════════════════════ */
+(function initRubberBand() {
+  let rb = null, rbStart = null, rbActive = false;
+
+  document.getElementById('canvas-frame').addEventListener('mousedown', (e) => {
+    if (e.target !== document.getElementById('canvas-frame')) return;
+    const frame = document.getElementById('canvas-frame');
+    const rect = frame.getBoundingClientRect();
+    const scale = zoom / 100;
+    rbStart = { x: (e.clientX - rect.left) / scale, y: (e.clientY - rect.top) / scale };
+    rbActive = true;
+    rb = document.createElement('div');
+    rb.style.cssText = 'position:absolute;border:1.5px dashed #29b6d8;background:rgba(41,182,216,0.07);pointer-events:none;z-index:998;left:' + rbStart.x + 'px;top:' + rbStart.y + 'px;width:0;height:0';
+    frame.appendChild(rb);
+  });
+
+  document.addEventListener('mousemove', (e) => {
+    if (!rbActive || !rb || !rbStart) return;
+    const frame = document.getElementById('canvas-frame');
+    const rect = frame.getBoundingClientRect();
+    const scale = zoom / 100;
+    const cx = (e.clientX - rect.left) / scale, cy = (e.clientY - rect.top) / scale;
+    const x = Math.min(rbStart.x, cx), y = Math.min(rbStart.y, cy);
+    rb.style.left = x + 'px'; rb.style.top = y + 'px';
+    rb.style.width = Math.abs(cx - rbStart.x) + 'px'; rb.style.height = Math.abs(cy - rbStart.y) + 'px';
+  });
+
+  document.addEventListener('mouseup', (e) => {
+    if (!rbActive || !rb || !rbStart) return;
+    const frame = document.getElementById('canvas-frame');
+    const rect = frame.getBoundingClientRect();
+    const scale = zoom / 100;
+    const cx = (e.clientX - rect.left) / scale, cy = (e.clientY - rect.top) / scale;
+    const selX = Math.min(rbStart.x, cx), selY = Math.min(rbStart.y, cy);
+    const selW = Math.abs(cx - rbStart.x), selH = Math.abs(cy - rbStart.y);
+    if (selW > 6 && selH > 6) {
+      const mockup = getActiveMockup();
+      if (mockup) {
+        const hits = mockup.elements.filter(el =>
+          el.x < selX + selW && el.x + el.width > selX &&
+          el.y < selY + selH && el.y + el.height > selY
+        );
+        if (hits.length > 0) {
+          state.selectedEls = new Set(hits.map(el => el.id));
+          state.selectedEl = hits[hits.length - 1].id;
+          updateSelectedHighlight();
+          if (hits.length > 1) renderMultiSelectPanel(hits.length);
+          else renderPropsPanel(state.selectedEl);
+          document.getElementById('sb-el').textContent = hits.length > 1
+            ? hits.length + ' elementos seleccionados'
+            : hits[0].type + ' (' + hits[0].x + ',' + hits[0].y + ')';
+        }
+      }
+    }
+    rb.remove(); rb = null; rbStart = null; rbActive = false;
+  });
+})();
+
+/* ═══════════════════════════════════════════════
+   INLINE TEXT EDITING (double-click)
+═══════════════════════════════════════════════ */
+const INLINE_EDIT_PROP = {
+  text: 'text', label: 'text', button: 'text',
+  input: 'placeholder', textarea: 'placeholder', select: 'placeholder',
+  card: 'title', navbar: 'brand', image: 'text',
+};
+
+function startInlineEdit(el) {
+  if (document.getElementById('inline-edit-overlay')) return;
+  const propKey = INLINE_EDIT_PROP[el.type];
+  if (!propKey) return;
+  const frame = document.getElementById('canvas-frame');
+  const overlay = document.createElement('div');
+  overlay.id = 'inline-edit-overlay';
+  overlay.style.cssText = 'position:absolute;left:' + el.x + 'px;top:' + el.y + 'px;width:' + el.width + 'px;height:' + el.height + 'px;z-index:1000;box-sizing:border-box';
+  const isMulti = el.type === 'textarea';
+  const inp = document.createElement(isMulti ? 'textarea' : 'input');
+  inp.value = el.props[propKey] || '';
+  inp.style.cssText = 'width:100%;height:100%;border:2px solid #29b6d8;border-radius:5px;padding:4px 8px;font-size:' + (el.props.fontSize || 13) + 'px;background:rgba(255,255,255,0.97);color:#1e293b;outline:none;resize:none;box-sizing:border-box;font-family:inherit';
+  overlay.appendChild(inp);
+  frame.appendChild(overlay);
+  inp.focus(); inp.select();
+  function commit() {
+    el.props[propKey] = inp.value;
+    overlay.remove();
+    const dom = document.getElementById('el-' + el.id);
+    if (dom) updateElDom(dom, el);
+    saveData();
+    if (state.selectedEl === el.id) renderPropsPanel(el.id);
+  }
+  inp.addEventListener('blur', commit);
+  inp.addEventListener('keydown', (e) => {
+    if (e.key === 'Enter' && !isMulti) { e.preventDefault(); commit(); }
+    if (e.key === 'Escape') overlay.remove();
+    e.stopPropagation();
+  });
+}
+
+/* ═══════════════════════════════════════════════
+   CLIPBOARD IMAGE PASTE
+═══════════════════════════════════════════════ */
+document.addEventListener('paste', (e) => {
+  const activeEl = document.activeElement;
+  if (activeEl && (activeEl.tagName === 'INPUT' || activeEl.tagName === 'TEXTAREA')) return;
+  const mockup = getActiveMockup();
+  if (!mockup) return;
+  const items = e.clipboardData && e.clipboardData.items;
+  if (!items) return;
+  for (let i = 0; i < items.length; i++) {
+    const item = items[i];
+    if (item.type.startsWith('image/')) {
+      const blob = item.getAsFile();
+      const reader = new FileReader();
+      reader.onload = (ev) => {
+        const src = ev.target.result;
+        const img = new Image();
+        img.onload = () => {
+          const maxW = Math.round(mockup.canvasWidth * 0.6);
+          const maxH = Math.round(mockup.canvasHeight * 0.6);
+          const ratio = img.width / img.height;
+          let w = Math.min(img.width, maxW), h = Math.round(w / ratio);
+          if (h > maxH) { h = maxH; w = Math.round(h * ratio); }
+          const el = {
+            id: uid(), type: 'image',
+            x: Math.round(mockup.canvasWidth / 2 - w / 2),
+            y: Math.round(mockup.canvasHeight / 2 - h / 2),
+            width: w, height: h,
+            zIndex: mockup.elements.length + 1,
+            props: { src, text: 'Imagen pegada' },
+          };
+          mockup.elements.push(el);
+          state.selectedEl = el.id;
+          state.selectedEls = new Set([el.id]);
+          saveData();
+          const frame = document.getElementById('canvas-frame');
+          if (frame.style.display !== 'none') {
+            const dom = createElDom(el);
+            frame.appendChild(dom);
+            updateElDom(dom, el);
+            updateSelectedHighlight();
+            renderPropsPanel(el.id);
+          }
+          showToast('Imagen pegada desde portapapeles');
+        };
+        img.src = src;
+      };
+      reader.readAsDataURL(blob);
+      e.preventDefault();
+      break;
+    }
+  }
+});
 
 /* ═══════════════════════════════════════════════
    INIT
