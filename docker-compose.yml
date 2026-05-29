@@ -1,0 +1,7 @@
+services:
+  mockups:
+    build: .
+    container_name: mockups
+    ports:
+      - "8080:80"
+    restart: unless-stopped
